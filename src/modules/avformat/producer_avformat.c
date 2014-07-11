@@ -1263,6 +1263,19 @@ static int convert_image( producer_avformat self, AVFrame *frame, uint8_t *buffe
 			output.data, output.linesize);
 		sws_freeContext( context );
 	}
+	else if (*format == mlt_image_rgb24a && src_full_range)
+	{
+		struct SwsContext *context = sws_getContext(width, height, src_pix_fmt,
+			width, height, PIX_FMT_RGBA, flags | SWS_FULL_CHR_H_INT, NULL,
+			NULL, NULL);
+		AVPicture output;
+		avpicture_fill(&output, buffer, PIX_FMT_RGBA, width, height);
+		// libswscale wants the RGB colorspace to be SWS_CS_DEFAULT, which is = SWS_CS_ITU601.
+		set_luma_transfer(context, self->yuv_colorspace, 601, 0, 0); // we must NOT pass full_range
+		sws_scale(context, (const uint8_t* const *) frame->data,
+			frame->linesize, 0, height, output.data, output.linesize);
+		sws_freeContext(context);
+	}
 	else if ( *format == mlt_image_rgb24 )
 	{
 		struct SwsContext *context = sws_getContext( width, height, src_pix_fmt,
