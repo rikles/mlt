@@ -178,6 +178,13 @@ static int convert_image( mlt_frame frame, uint8_t **image, mlt_image_format *fo
 						  &&  ( !strcmp( "jpeg", mlt_properties_get( properties, "consumer_color_range" ) )
 							 || !strcmp( "JPEG", mlt_properties_get( properties, "consumer_color_range" ) )
 				   ) ) );
+
+		if ( output_format == mlt_image_rgb24
+				|| output_format == mlt_image_rgb24a
+				|| output_format == mlt_image_opengl )
+			src_full_range = 0;
+		else if ( output_format == mlt_image_yuv420p || output_format == mlt_image_yuv422 )
+			dst_full_range = dst_full_range || src_full_range;
 		
 		mlt_log_info( NULL, "[filter avcolor_space] %s -> %s @ %dx%d space %d->%d src_full_range %d dst_full_range %d\n",
 			mlt_image_format_name( *format ), mlt_image_format_name( output_format ),

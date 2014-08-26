@@ -1202,7 +1202,8 @@ static int convert_image( producer_avformat self, AVFrame *frame, uint8_t *buffe
 	flags |= SWS_CPU_CAPS_MMX2;
 #endif
 
-	mlt_log_info( MLT_PRODUCER_SERVICE(self->parent), "%s @ %dx%d space %d->%d src_full_range %d dst_full_range %d\n",
+	mlt_log_info( MLT_PRODUCER_SERVICE(self->parent), "%s->%s @ %dx%d space %d->%d src_full_range %d dst_full_range %d\n",
+		av_get_pix_fmt_name(pix_fmt),
 		mlt_image_format_name( *format ),
 		width, height, self->yuv_colorspace, profile->colorspace, self->full_luma, dst_full_range );
 
@@ -1270,7 +1271,7 @@ static int convert_image( producer_avformat self, AVFrame *frame, uint8_t *buffe
 		AVPicture output;
 		avpicture_fill( &output, buffer, PIX_FMT_RGBA, width, height );
 		// libswscale wants the RGB colorspace to be SWS_CS_DEFAULT, which is = SWS_CS_ITU601.
-		set_luma_transfer( context, self->yuv_colorspace, 601, self->full_luma, 0 );
+		set_luma_transfer( context, self->yuv_colorspace, 601, 0, 0 );
 		sws_scale( context, (const uint8_t* const*) frame->data, frame->linesize, 0, height,
 			output.data, output.linesize);
 		sws_freeContext( context );
@@ -1487,6 +1488,8 @@ static int producer_get_image( mlt_frame frame, uint8_t **buffer, mlt_image_form
 #endif
 	if ( *format == mlt_image_rgb24 || *format == mlt_image_rgb24a || *format == mlt_image_opengl )
 		dst_full_range = 0;
+	else if ( *format == mlt_image_yuv422 )
+		dst_full_range = dst_full_range || self->full_luma;
 
 	// Duplicate the last image if necessary
 	if ( self->video_frame && self->video_frame->linesize[0]
