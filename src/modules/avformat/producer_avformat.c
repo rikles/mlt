@@ -1739,7 +1739,7 @@ static int producer_get_image( mlt_frame frame, uint8_t **buffer, mlt_image_form
 
 #if !defined(FFUDIV) || (LIBAVFORMAT_VERSION_INT < ((55<<16)+(48<<8)+100))
 					// Convert yuv422p to yuv422 if needed.
-					if ( dst_full_range && *format == mlt_image_yuv42 )
+					if ( dst_full_range && *format == mlt_image_yuv422 )
 					{
 						int size = mlt_image_format_size( *format, *width, *height, NULL );
 						uint8_t* new_buffer = mlt_pool_alloc( size );
